@@ -7,6 +7,10 @@ android {
     namespace = "com.example.emprendenow"
     compileSdk = 34
 
+    buildFeatures {
+        viewBinding = true
+    }
+
     defaultConfig {
         applicationId = "com.example.emprendenow"
         minSdk = 24
