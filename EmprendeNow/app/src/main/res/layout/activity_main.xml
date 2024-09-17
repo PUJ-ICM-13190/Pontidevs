@@ -16,7 +16,7 @@
             android:id="@+id/logo"
             android:layout_width="300dp"
             android:layout_height="300dp"
-            android:src="@drawable/emprendenow"
+            android:src="@drawable/logo_completo"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="150dp"/>
 
