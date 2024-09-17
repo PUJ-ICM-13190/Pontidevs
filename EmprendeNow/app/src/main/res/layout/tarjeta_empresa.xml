@@ -10,7 +10,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:background="#6fb4f4">
 
         <ImageView
             android:id="@+id/logo"
@@ -26,15 +27,17 @@
             android:layout_below="@+id/logo"
             android:layout_marginTop="8dp"
             android:textSize="25sp"
-            android:textStyle="normal"/>
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
 
         <TextView
-            android:id="@+id/native_name"
+            android:id="@+id/descripcion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/nombre_empresa"
             android:layout_marginTop="4dp"
-            android:textSize="16sp"/>
+            android:textSize="16sp"
+            android:textColor="@color/black"/>
 
     </RelativeLayout>
 

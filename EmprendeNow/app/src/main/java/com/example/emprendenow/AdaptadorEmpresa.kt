@@ -22,7 +22,7 @@ class AdaptadorEmpresa(context: Context, private val empresas: List<ListaEmpresa
 
             val empresa = empresas[position]
             binding.nombreEmpresa.text = empresa.name
-            binding.nombreEmpresa.text = empresa.name
+            binding.descripcion.text = empresa.descripcion
 
             return view
         }

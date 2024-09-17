@@ -30,6 +30,13 @@ class ListaEmpresasActivity : AppCompatActivity() {
                 descripcion = "Google es una motor de busqueda de internet"
             )
         )
+        empresas.add(
+            Empresa(
+                name = "Facebook",
+                logo = "logo",
+                descripcion = "Facebook es una red social para conectar con tus amigos y familiares"
+            )
+        )
         return empresas
     }
 
