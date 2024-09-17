@@ -1,5 +1,6 @@
 package com.example.emprendenow
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -19,7 +20,8 @@ class MainActivity : AppCompatActivity() {
         val boton = binding.unirseBoton
 
         boton.setOnClickListener {
-
+            val intent = Intent(this, CrearCuentaActivity::class.java)
+            startActivity(intent)
         }
     }
 }
