@@ -38,7 +38,8 @@ class MenuEmprendedorActivity : AppCompatActivity() {
         }
 
         btn.setOnClickListener {
-
+            val intent = Intent(this, AgregarEmprendimientoActivity::class.java)
+            startActivity(intent)
         }
     }
 }
