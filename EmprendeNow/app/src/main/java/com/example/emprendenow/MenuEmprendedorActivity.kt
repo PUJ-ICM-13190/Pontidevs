@@ -19,26 +19,35 @@ class MenuEmprendedorActivity : AppCompatActivity() {
 
         val btn = binding.button
         val navbar = binding.bottomNavigation
+        val update = binding.settingIcon
 
         navbar.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.home -> {
                     true
                 }
+
                 R.id.chat -> {
                     true
                 }
+
                 R.id.account -> {
                     val intent = Intent(this, CuentaEmprenActivity::class.java)
                     startActivity(intent)
                     true
                 }
+
                 else -> false
             }
         }
 
         btn.setOnClickListener {
             val intent = Intent(this, AgregarEmprendimientoActivity::class.java)
+            startActivity(intent)
+        }
+
+        update.setOnClickListener {
+            val intent = Intent(this, ActualizarEmprendimientoActivity::class.java) // Replace TargetActivity with your target activity
             startActivity(intent)
         }
     }

@@ -73,12 +73,15 @@
         android:textStyle="bold"/>
 
     <ImageView
+        android:id="@+id/settingIcon"
         android:layout_width="75dp"
         android:layout_height="75dp"
         android:src="@drawable/settings_icon"
         android:layout_toEndOf="@+id/text4"
         android:layout_alignTop="@+id/text4"
-        android:layout_marginStart="20dp"/>
+        android:layout_marginStart="20dp"
+        android:clickable="true"
+        android:focusable="true"/>
 
     <TextView
         android:id="@+id/text5"
