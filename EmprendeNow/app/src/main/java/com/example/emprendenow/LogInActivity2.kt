@@ -20,11 +20,12 @@ class LogInActivity2 : AppCompatActivity() {
 
         boton.setOnClickListener {
             val mail = binding.mail.text.toString()
-            val password = binding.password.text.toString()
 
             if (mail == "user") {
                 val intent = Intent(this, ListaEmpresasActivity::class.java)
-                intent.putExtra("mail", mail)
+                startActivity(intent)
+            } else if (mail == "emprendedor") {
+                val intent = Intent(this, MenuEmprendedorActivity::class.java)
                 startActivity(intent)
             }
         }

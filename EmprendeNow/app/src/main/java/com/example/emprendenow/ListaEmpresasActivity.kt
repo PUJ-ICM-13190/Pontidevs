@@ -1,5 +1,6 @@
 package com.example.emprendenow
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -16,9 +17,27 @@ class ListaEmpresasActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val listaEmpresas = listarEmpresas()
+        val navbar = binding.bottomNavigation
 
         val adapter = AdaptadorEmpresa(this, listaEmpresas)
         binding.listView.adapter = adapter
+
+        navbar.setOnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.home -> {
+                    true
+                }
+                R.id.chat -> {
+                    true
+                }
+                R.id.account -> {
+                    val intent = Intent(this, CuentaClienActivity::class.java)
+                    startActivity(intent)
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
     private fun listarEmpresas(): List<Empresa> {
