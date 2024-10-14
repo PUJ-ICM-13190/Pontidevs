@@ -20,6 +20,7 @@ class MenuEmprendedorActivity : AppCompatActivity() {
         val btn = binding.button
         val navbar = binding.bottomNavigation
         val update = binding.settingIcon
+        val location = binding.locationIcon
 
         navbar.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
@@ -48,6 +49,11 @@ class MenuEmprendedorActivity : AppCompatActivity() {
 
         update.setOnClickListener {
             val intent = Intent(this, ActualizarEmprendimientoActivity::class.java) // Replace TargetActivity with your target activity
+            startActivity(intent)
+        }
+
+        location.setOnClickListener {
+            val intent = Intent(this, MapaEmpresaActivity::class.java)
             startActivity(intent)
         }
     }

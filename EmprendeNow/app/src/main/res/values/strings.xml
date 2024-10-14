@@ -6,9 +6,16 @@
     <string name="bienvenido_empr">Bienvenido Emprendedor</string>
     <string name="mensaje_no_haz">No haz añadido tu emprendimiento</string>
     <string name="msg_btn_anadir">Añadir emprendimiento</string>
+    <string name="costo">Costo:</string>
+    <string name="cantidad">Cantidad:</string>
+    <string name="metodo_pago">Metodo de pago</string>
+    <string name="calificacion">Calificacion</string>
+    <string name="usa_gps">Usa la opcion de GPS de tu celular</string>
 
     <string-array name="tipos_usuarios">
         <item>Empresa</item>
         <item>Cliente</item>
     </string-array>
+    <string name="title_activity_mapa_empresa">MapaEmpresaActivity</string>
+    <string name="title_activity_mapa_cliente">MapaClienteActivity</string>
 </resources>

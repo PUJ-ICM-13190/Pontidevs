@@ -1,6 +1,7 @@
 package com.example.emprendenow
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import  android.view.ViewGroup
@@ -23,6 +24,12 @@ class AdaptadorEmpresa(context: Context, private val empresas: List<ListaEmpresa
             val empresa = empresas[position]
             binding.nombreEmpresa.text = empresa.name
             binding.descripcion.text = empresa.descripcion
+
+            view.setOnClickListener {
+                val intent = Intent(context, InfoEmprendimientoActivity::class.java)
+                intent.putExtra("EmprendimientoName", empresa.name)
+                context.startActivity(intent)
+            }
 
             return view
         }
