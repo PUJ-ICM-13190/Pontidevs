@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">EmprendeNow</string>
-    <string name="crear_cuenta">Crear cuenta</string>
+    <string name="crear_cuenta">Bienvenido</string>
     <string name="iniciar_sesion">Iniciar Sesión</string>
-    <string name="mensaje_iniciar_sesion">Ya tienes cuenta, inicia sesión</string>
+    <string name="mensaje_iniciar_sesion">Inicia sesión</string>
     <string name="bienvenido_empr">Bienvenido Emprendedor</string>
     <string name="mensaje_no_haz">No haz añadido tu emprendimiento</string>
     <string name="msg_btn_anadir">Añadir emprendimiento</string>
