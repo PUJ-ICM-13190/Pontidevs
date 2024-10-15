@@ -10,7 +10,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#5271ff">
+        android:background="#6fb5f4">
 
         <ImageView
             android:id="@+id/logo"
@@ -94,27 +94,24 @@
             android:text="Registrarse"
             android:textSize="15sp"
             android:backgroundTint="#cb6ce6"/>
-
-        <TextView
-            android:id="@+id/texto_login"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@+id/btn_register"
-            android:text="@string/mensaje_iniciar_sesion"
-            android:textSize="25sp"
-            android:textStyle="bold"
-            android:textColor="@color/black"/>
-
         <Button
             android:id="@+id/btn_login"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/texto_login"
-            android:layout_marginTop="20dp"
+            android:layout_below="@+id/btn_register"
+            android:layout_marginTop="10dp"
             android:layout_centerHorizontal="true"
             android:text="Iniciar sesión"
+            android:textSize="15sp"
+            android:backgroundTint="#cb6ce6"/>
+        <Button
+            android:id="@+id/btn_pass"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/btn_login"
+            android:layout_marginTop="10dp"
+            android:layout_centerHorizontal="true"
+            android:text="Recupera tu Contraseña"
             android:textSize="15sp"
             android:backgroundTint="#cb6ce6"/>
 

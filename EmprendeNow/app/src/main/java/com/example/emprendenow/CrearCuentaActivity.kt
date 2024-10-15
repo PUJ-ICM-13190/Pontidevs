@@ -2,37 +2,171 @@ package com.example.emprendenow
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.ArrayAdapter
-import androidx.activity.enableEdgeToEdge
+import android.text.TextUtils
+import android.util.Log
+import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 import com.example.emprendenow.databinding.ActivityCrearCuentaBinding
 
 class CrearCuentaActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityCrearCuentaBinding
+
+    private val TAG = CrearCuentaActivity::class.java.name
+    private val VALID_EMAIL_ADDRESS_REGEX =
+        Pattern.compile("[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE)
+
+    lateinit var emailEdit: EditText
+    lateinit var passEdit: EditText
+    private lateinit var mAuth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityCrearCuentaBinding.inflate(layoutInflater)
+        val binding: ActivityCrearCuentaBinding = ActivityCrearCuentaBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val spinner = binding.userType
-        val btn_register = binding.btnRegister
-        val btn_login = binding.btnLogin
+        emailEdit = binding.mail
+        passEdit = binding.password
 
-        val tipos_usuarios = resources.getStringArray(R.array.tipos_usuarios)
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, tipos_usuarios)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner.adapter = adapter
+        // Initialize Firebase Auth
+        mAuth = Firebase.auth
 
-        btn_register.setOnClickListener {
-
+        binding.btnLogin.setOnClickListener {
+            login()
         }
 
-        btn_login.setOnClickListener {
-            intent = Intent(this, LogInActivity2::class.java)
+        binding.btnRegister.setOnClickListener {
+            signUp()
+        }
+
+        binding.btnPass.setOnClickListener {
+            forgotPassword()
+        }
+
+    }
+
+
+    override fun onStart() {
+        super.onStart()
+        val currentUser = mAuth.currentUser
+        updateUI(currentUser)
+    }
+
+
+    private fun updateUI(currentUser: FirebaseUser?) {
+        if (currentUser != null) {
+            val intent = Intent(baseContext, CuentaClienActivity::class.java)
+            intent.putExtra("user", currentUser.email)
             startActivity(intent)
+        } else {
+            emailEdit.setText("")
+            passEdit.setText("")
         }
     }
+
+
+    private fun validateForm(): Boolean {
+        var valid = true
+        val email = emailEdit.text.toString()
+        if (TextUtils.isEmpty(email)) {
+            emailEdit.error = "Required"
+            valid = false
+        } else {
+            emailEdit.error = null
+        }
+        val password = passEdit.text.toString()
+        if (TextUtils.isEmpty(password)) {
+            passEdit.error = "Required"
+            valid = false
+        } else {
+            passEdit.error = null
+        }
+        return valid
+    }
+
+
+
+    private fun signInUser(email: String, password: String) {
+        if (validateForm()) {
+            mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                        // Sign in success, update UI
+                        Log.d(TAG, "signInWithEmail: Success")
+                        val user = mAuth.currentUser
+                        updateUI(user)
+                    } else {
+                        // If Sign in fails, display a message to the user.
+                        Log.w(TAG, "signInWithEmail: Failure", task.exception)
+                        Toast.makeText(this@CrearCuentaActivity, "Authentication failed.", Toast.LENGTH_SHORT).show()
+                        updateUI(null)
+                    }
+                }
+        }
+    }
+
+
+    private fun isEmailValid(emailStr: String?): Boolean {
+        val matcher: Matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(emailStr)
+        return matcher.find()
+    }
+
+
+    private fun login() {
+        val email = emailEdit.text.toString()
+        val pass = passEdit.text.toString()
+        if (!isEmailValid(email)) {
+            Toast.makeText(this@CrearCuentaActivity, "Email is not a valid format", Toast.LENGTH_SHORT).show()
+            return
+        }
+        signInUser(email, pass)
+    }
+
+
+    private fun signUp() {
+        val email = emailEdit.text.toString()
+        val pass = passEdit.text.toString()
+        if (!isEmailValid(email)) {
+            Toast.makeText(this@CrearCuentaActivity, "Email is not a valid format", Toast.LENGTH_SHORT).show()
+            return
+        }
+        mAuth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener(this) { task ->
+            if (task.isSuccessful) {
+                val user = mAuth.currentUser
+                Toast.makeText(
+                    this@CrearCuentaActivity,
+                    String.format("The user %s is successfully registered", user!!.email),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }.addOnFailureListener(this) { e ->
+            Toast.makeText(this@CrearCuentaActivity, e.message, Toast.LENGTH_LONG).show() }
+    }
+
+
+    private fun forgotPassword() {
+        val email = emailEdit.text.toString()
+        if (isEmailValid(email)) {
+            Toast.makeText(
+                this@CrearCuentaActivity,
+                "Email is not a valid format",
+                Toast.LENGTH_SHORT)
+                .show()
+            return
+        }
+        mAuth.sendPasswordResetEmail(email).addOnCompleteListener(this) {
+            Toast.makeText(
+                this@CrearCuentaActivity,
+                "Email instructions hace been sent, please check your email",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+
 }
