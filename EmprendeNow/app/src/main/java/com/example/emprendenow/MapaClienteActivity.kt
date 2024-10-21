@@ -39,6 +39,9 @@ class MapaClienteActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
 
                 R.id.chat -> {
+                    val intent = Intent(this, ListaChatsActivity::class.java)
+                    intent.putExtra("usuario", "user")
+                    startActivity(intent)
                     true
                 }
 

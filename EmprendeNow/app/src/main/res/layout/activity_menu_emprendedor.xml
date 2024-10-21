@@ -90,7 +90,7 @@
         android:layout_below="@+id/text4"
         android:layout_marginStart="30dp"
         android:layout_marginTop="15dp"
-        android:text="Actualiza la información de tu emprendiento"
+        android:text="Actualiza la información de tu ubicacion"
         android:textColor="@color/black"
         android:textSize="23sp"
         android:textStyle="bold"/>

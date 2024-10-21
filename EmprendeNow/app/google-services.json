@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1006658879221",
+    "project_id": "pontidevs",
+    "storage_bucket": "pontidevs.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1006658879221:android:68505bae9413967db78fbc",
+        "android_client_info": {
+          "package_name": "com.example.emprendenow"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8UtkF7fY3C03S8GsMZridlGRbdACtnkI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

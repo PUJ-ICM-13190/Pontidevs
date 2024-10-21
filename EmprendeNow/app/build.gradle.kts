@@ -49,11 +49,15 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.play.services.maps)
+    implementation(libs.firebase.auth.ktx) // This includes Firebase Auth with Kotlin extensions
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Firebase BOM (manages versions of Firebase libraries)
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
-    implementation(libs.firebase.auth)
-    implementation("com.google.firebase:firebase-database:21.0.0")
-    implementation("com.google.firebase:firebase-storage:21.0.1")
+
+    // Use the following without specifying versions, as BOM handles it
+    implementation("com.google.firebase:firebase-database")
+    implementation("com.google.firebase:firebase-storage")
 }

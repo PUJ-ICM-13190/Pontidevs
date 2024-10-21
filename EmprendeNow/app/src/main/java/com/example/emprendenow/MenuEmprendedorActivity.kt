@@ -17,6 +17,7 @@ class MenuEmprendedorActivity : AppCompatActivity() {
         binding = ActivityMenuEmprendedorBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val userId = intent.getStringExtra("user")
         val btn = binding.button
         val navbar = binding.bottomNavigation
         val update = binding.settingIcon
@@ -34,6 +35,7 @@ class MenuEmprendedorActivity : AppCompatActivity() {
 
                 R.id.account -> {
                     val intent = Intent(this, CuentaEmprenActivity::class.java)
+                    intent.putExtra("user", userId)
                     startActivity(intent)
                     true
                 }
@@ -44,16 +46,19 @@ class MenuEmprendedorActivity : AppCompatActivity() {
 
         btn.setOnClickListener {
             val intent = Intent(this, AgregarEmprendimientoActivity::class.java)
+            intent.putExtra("user", userId)
             startActivity(intent)
         }
 
         update.setOnClickListener {
-            val intent = Intent(this, ActualizarEmprendimientoActivity::class.java) // Replace TargetActivity with your target activity
+            val intent = Intent(this, ActualizarEmprendimientoActivity::class.java)
+            intent.putExtra("user", userId)
             startActivity(intent)
         }
 
         location.setOnClickListener {
             val intent = Intent(this, MapaEmpresaActivity::class.java)
+            intent.putExtra("user", userId)
             startActivity(intent)
         }
     }

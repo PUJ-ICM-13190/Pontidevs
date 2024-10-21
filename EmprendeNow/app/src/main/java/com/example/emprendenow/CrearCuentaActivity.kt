@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +15,8 @@ import com.google.firebase.ktx.Firebase
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import com.example.emprendenow.databinding.ActivityCrearCuentaBinding
+import com.google.firebase.auth.UserInfo
+import com.google.firebase.database.FirebaseDatabase
 
 class CrearCuentaActivity : AppCompatActivity() {
 
@@ -24,14 +27,21 @@ class CrearCuentaActivity : AppCompatActivity() {
     lateinit var emailEdit: EditText
     lateinit var passEdit: EditText
     private lateinit var mAuth: FirebaseAuth
+    private lateinit var binding: ActivityCrearCuentaBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding: ActivityCrearCuentaBinding = ActivityCrearCuentaBinding.inflate(layoutInflater)
+        binding = ActivityCrearCuentaBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         emailEdit = binding.mail
         passEdit = binding.password
+        val userTypeSpinner = binding.userType
+        val userTypes = resources.getStringArray(R.array.tipos_usuarios)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, userTypes)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        userTypeSpinner.adapter = adapter
+        val name = binding.name
 
         // Initialize Firebase Auth
         mAuth = Firebase.auth
@@ -60,9 +70,27 @@ class CrearCuentaActivity : AppCompatActivity() {
 
     private fun updateUI(currentUser: FirebaseUser?) {
         if (currentUser != null) {
-            val intent = Intent(baseContext, CuentaClienActivity::class.java)
-            intent.putExtra("user", currentUser.email)
-            startActivity(intent)
+            val userId = currentUser.uid
+            val databaseReference = FirebaseDatabase.getInstance().getReference("users/$userId")
+            databaseReference.child("userType").get().addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val userType = task.result?.value.toString()
+                    when (userType) {
+                        "Cliente" -> {
+                            val intent = Intent(baseContext, CuentaClienActivity::class.java)
+                            intent.putExtra("user", currentUser.uid)
+                            startActivity(intent)
+                        }
+                        "Empresa" -> {
+                            val intent = Intent(this, CuentaEmprenActivity::class.java)
+                            intent.putExtra("user", currentUser.uid)
+                            startActivity(intent)
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "Error getting user type: ${task.exception}")
+                }
+            }
         } else {
             emailEdit.setText("")
             passEdit.setText("")
@@ -131,6 +159,8 @@ class CrearCuentaActivity : AppCompatActivity() {
     private fun signUp() {
         val email = emailEdit.text.toString()
         val pass = passEdit.text.toString()
+        val name = binding.name.text.toString()
+        val userType = binding.userType.selectedItem.toString()
         if (!isEmailValid(email)) {
             Toast.makeText(this@CrearCuentaActivity, "Email is not a valid format", Toast.LENGTH_SHORT).show()
             return
@@ -138,11 +168,22 @@ class CrearCuentaActivity : AppCompatActivity() {
         mAuth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener(this) { task ->
             if (task.isSuccessful) {
                 val user = mAuth.currentUser
-                Toast.makeText(
-                    this@CrearCuentaActivity,
-                    String.format("The user %s is successfully registered", user!!.email),
-                    Toast.LENGTH_LONG
-                ).show()
+                val userId = user!!.uid
+                val database = FirebaseDatabase.getInstance().getReference("users")
+                val userInfo = mapOf(
+                    "email" to email,
+                    "name" to name,
+                    "userType" to userType
+                )
+                database.child(userId).setValue(userInfo).addOnCompleteListener {
+                    Toast.makeText(
+                        this@CrearCuentaActivity,
+                        String.format("The user %s is successfully registered", user!!.email),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }.addOnFailureListener { e ->
+                    Toast.makeText(this@CrearCuentaActivity, e.message, Toast.LENGTH_LONG).show()
+                }
             }
         }.addOnFailureListener(this) { e ->
             Toast.makeText(this@CrearCuentaActivity, e.message, Toast.LENGTH_LONG).show() }
