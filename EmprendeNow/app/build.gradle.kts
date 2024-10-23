@@ -54,6 +54,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
 
     // Firebase BOM (manages versions of Firebase libraries)
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
