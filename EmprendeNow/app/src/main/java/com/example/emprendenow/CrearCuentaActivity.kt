@@ -178,7 +178,7 @@ class CrearCuentaActivity : AppCompatActivity() {
                 database.child(userId).setValue(userInfo).addOnCompleteListener {
                     Toast.makeText(
                         this@CrearCuentaActivity,
-                        String.format("The user %s is successfully registered", user!!.email),
+                        String.format("The user %s is successfully registered", user.email),
                         Toast.LENGTH_LONG
                     ).show()
                 }.addOnFailureListener { e ->

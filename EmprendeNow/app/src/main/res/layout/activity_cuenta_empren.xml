@@ -17,7 +17,19 @@
         android:layout_height="150dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="15dp"
-        android:layout_below="@+id/logo"/>
+        android:layout_below="@+id/logo"
+        android:src="@drawable/user_icon"/>
+
+    <Button
+        android:id="@+id/cambiar_imagen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/profile_pic"
+        android:layout_below="@+id/text_mail"
+        android:text="Cambiar foto"
+        android:textSize="15sp"
+        android:backgroundTint="#cb6ce6"
+        android:layout_marginTop="5dp"/>
 
     <TextView
         android:id="@+id/text_hola"
@@ -59,7 +71,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:layout_marginStart="20dp"
-        android:layout_below="@+id/profile_pic"
+        android:layout_below="@+id/cambiar_imagen"
         android:text="Mis emprendimientos"
         android:textColor="@color/black"
         android:textStyle="bold"

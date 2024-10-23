@@ -69,7 +69,6 @@ class AgregarEmprendimientoActivity : AppCompatActivity() {
 
     private fun addEmprendimientoToUser(userId: String, name: String, description: String) {
         val database = FirebaseDatabase.getInstance().getReference("users/$userId/emprendimiento")
-        val emprendimientoId = database.push().key
 
         val datos = hashMapOf(
             "name" to name,
@@ -81,6 +80,9 @@ class AgregarEmprendimientoActivity : AppCompatActivity() {
                     Toast.makeText(this, "Emprendimiento añadido", Toast.LENGTH_SHORT).show()
                     binding.name.text.clear()
                     binding.description.text.clear()
+                    val intent = Intent(this, MenuEmprendedorActivity::class.java)
+                    intent.putExtra("user", userId)
+                    startActivity(intent)
                 } else {
                     Toast.makeText(this, "No se pudo añadir el emprendimiento", Toast.LENGTH_SHORT).show()
                 }
