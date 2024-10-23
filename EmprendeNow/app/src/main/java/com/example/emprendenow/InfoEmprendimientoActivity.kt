@@ -17,8 +17,10 @@ class InfoEmprendimientoActivity : AppCompatActivity() {
         binding = ActivityInfoEmprendimientoBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val empresa = intent.getStringExtra("EmprendimientoName")
         val navbar = binding.bottomNavigation
         val location =  binding.locationButton
+        binding.name.text = empresa
 
         navbar.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
@@ -41,6 +43,7 @@ class InfoEmprendimientoActivity : AppCompatActivity() {
 
         location.setOnClickListener {
             val intent = Intent(this, MapaClienteActivity::class.java)
+            intent.putExtra("emprendimiento", empresa)
             startActivity(intent)
         }
     }

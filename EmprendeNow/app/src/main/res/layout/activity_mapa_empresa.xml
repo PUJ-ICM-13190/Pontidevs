@@ -55,6 +55,7 @@
         android:textSize="20sp"/>
 
     <ImageView
+        android:id="@+id/location"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintStart_toEndOf="@+id/text"

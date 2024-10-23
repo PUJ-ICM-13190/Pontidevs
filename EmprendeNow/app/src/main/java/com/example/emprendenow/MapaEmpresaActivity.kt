@@ -1,13 +1,19 @@
 package com.example.emprendenow
 
+import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.location.Geocoder
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.Toast
-
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import android.Manifest
+import android.location.Location
+import android.os.Looper
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -15,6 +21,13 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.example.emprendenow.databinding.ActivityMapaEmpresaBinding
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.Granularity
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.Marker
 import com.google.firebase.database.FirebaseDatabase
@@ -25,6 +38,7 @@ class MapaEmpresaActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var mGeocoder: Geocoder
     private lateinit var binding: ActivityMapaEmpresaBinding
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     lateinit var mAddress: EditText
     private var lastMarker: Marker? = null
@@ -35,6 +49,8 @@ class MapaEmpresaActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private val logger = Logger.getLogger(TAG)
+    private val LOCATION_PERMISSION_ID = 103
+    var locationPerm = Manifest.permission.ACCESS_FINE_LOCATION
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,9 +58,11 @@ class MapaEmpresaActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityMapaEmpresaBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         val navbar = binding.bottomNavigation
         val user = intent.getStringExtra("user")
         val confirmLocation = binding.confirmLocation
+        val location = binding.location
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
@@ -64,6 +82,10 @@ class MapaEmpresaActivity : AppCompatActivity(), OnMapReadyCallback {
             } else {
                 false
             }
+        }
+
+        location.setOnClickListener {
+            getCurrentLocation() // Obtener la ubicación actual
         }
 
         navbar.setOnNavigationItemSelectedListener { item ->
@@ -191,6 +213,35 @@ class MapaEmpresaActivity : AppCompatActivity(), OnMapReadyCallback {
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12f))
 
                 Toast.makeText(this, "Marcador agregado en: $latLng", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun requestLocationPermissions() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_CHECK_SETTINGS)
+        }
+    }
+
+    private fun getCurrentLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
+        } else {
+            // Si ya se tienen permisos, obtiene la última ubicación
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                if (location != null) {
+                    val userLocation = LatLng(location.latitude, location.longitude)
+                    lastMarker?.remove()
+                    lastMarker = mMap.addMarker(MarkerOptions().position(userLocation).title("Tu Ubicación"))
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 13f))
+                } else {
+                    Toast.makeText(this, "No se pudo obtener la ubicación actual", Toast.LENGTH_SHORT).show()
+                    logger.warning("No se pudo obtener la ubicación actual")
+                }
+            }.addOnFailureListener { e ->
+                Toast.makeText(this, "Error al obtener la ubicación: ${e.message}", Toast.LENGTH_SHORT).show()
+                logger.warning("Error al obtener la ubicación: ${e.message}")
             }
         }
     }
