@@ -4,21 +4,26 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
-
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.example.emprendenow.databinding.ActivityMapaClienteBinding
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import java.util.logging.Logger
+import okhttp3.*
+import org.json.JSONObject
+import java.io.IOException
+import java.io.InputStream
 
 class MapaClienteActivity : AppCompatActivity(), OnMapReadyCallback {
+
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapaClienteBinding
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -32,22 +37,14 @@ class MapaClienteActivity : AppCompatActivity(), OnMapReadyCallback {
         const val GOOGLE_API_KEY = "AIzaSyD4eAMvMWh_VT6CptSHX6AdA0xVKyKj41Y"
     }
 
-    companion object {
-        private val TAG = MapaEmpresaActivity::class.java.name
-        const val REQUEST_CHECK_SETTINGS = 201
-    }
-
-    private val logger = Logger.getLogger(TAG)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMapaClienteBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val empresa = intent.getStringExtra("emprendimiento")
-        val navbar = binding.bottomNavigation
-        val databaseRef = FirebaseDatabase.getInstance().getReference("users")
+        // Inicializa el FusedLocationProviderClient para obtener la ubicación del usuario
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // Verificar permisos de ubicación antes de inicializar el mapa
         checkLocationPermission()
@@ -66,35 +63,9 @@ class MapaClienteActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
     }
 
-        databaseRef.orderByChild("emprendimiento/name").equalTo(empresa)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    for (empresaSnapshot in dataSnapshot.children) {
-                        val latitud = empresaSnapshot.child("location/latitude").getValue(Double::class.java)
-                        logger.info("Latitud: $latitud")
-                        val longitud = empresaSnapshot.child("location/longitude").getValue(Double::class.java)
-                        logger.info("Longitud: $longitud")
-
-                        if (latitud != null && longitud != null) {
-                            val empresaLocation = LatLng(latitud, longitud)
-                            mMap.addMarker(MarkerOptions().position(empresaLocation).title("Ubicación de $empresa"))
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(empresaLocation, 13f))
-                        }
-                    }
-                }
-
-                override fun onCancelled(databaseError: DatabaseError) {
-                    Toast.makeText(this@MapaClienteActivity, "Error al cargar la ubicación", Toast.LENGTH_SHORT).show()
-                }
-            })
-
-        navbar.setOnNavigationItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.home -> {
-                    val intent = Intent(this, ListaEmpresasActivity::class.java)
-                    startActivity(intent)
-                    true
-                }
+    override fun onMapReady(googleMap: GoogleMap) {
+        mMap = googleMap
+        enableLocation()
 
         // Leer las coordenadas de destino desde el archivo JSON
         val destinationLocation = readDestinationFromJson()
@@ -126,14 +97,16 @@ class MapaClienteActivity : AppCompatActivity(), OnMapReadyCallback {
                     currentLocation = LatLng(location.latitude, location.longitude)
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation!!, 15f))
 
-        val bogota = LatLng(4.60971, -74.08175)
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(bogota, 12f))
-
-        mMap.uiSettings.setAllGesturesEnabled(true)
-        mMap.uiSettings.isZoomControlsEnabled = true
-        mMap.uiSettings.isMapToolbarEnabled = true
-        mMap.uiSettings.isCompassEnabled = true
-        mMap.uiSettings.isMyLocationButtonEnabled = true
+                    mMap.addMarker(MarkerOptions().position(currentLocation!!).title("Tu ubicación"))
+                } else {
+                    Toast.makeText(this, "No se pudo obtener la ubicación actual", Toast.LENGTH_SHORT).show()
+                }
+            }.addOnFailureListener {
+                Toast.makeText(this, "Error al obtener la ubicación", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
     }
 
     // Función para leer las coordenadas del destino desde un archivo JSON en res/raw

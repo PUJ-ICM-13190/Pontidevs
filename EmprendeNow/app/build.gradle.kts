@@ -51,6 +51,8 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.play.services.location)
+    implementation ("androidx.biometric:biometric:1.2.0-alpha04")
+    implementation ("androidx.security:security-crypto:1.0.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

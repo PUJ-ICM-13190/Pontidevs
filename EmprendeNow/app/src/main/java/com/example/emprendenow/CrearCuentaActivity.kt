@@ -8,6 +8,8 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
@@ -17,6 +19,7 @@ import java.util.regex.Pattern
 import com.example.emprendenow.databinding.ActivityCrearCuentaBinding
 import com.google.firebase.auth.UserInfo
 import com.google.firebase.database.FirebaseDatabase
+import java.util.concurrent.Executor
 
 class CrearCuentaActivity : AppCompatActivity() {
 
@@ -28,6 +31,9 @@ class CrearCuentaActivity : AppCompatActivity() {
     lateinit var passEdit: EditText
     private lateinit var mAuth: FirebaseAuth
     private lateinit var binding: ActivityCrearCuentaBinding
+    private lateinit var biometricPrompt: BiometricPrompt
+    private lateinit var promptInfo: BiometricPrompt.PromptInfo
+    private lateinit var executor: Executor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +51,40 @@ class CrearCuentaActivity : AppCompatActivity() {
 
         // Initialize Firebase Auth
         mAuth = Firebase.auth
+
+        // Configuración de BiometricPrompt
+        executor = ContextCompat.getMainExecutor(this)
+        biometricPrompt = BiometricPrompt(this, executor, object : BiometricPrompt.AuthenticationCallback() {
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                super.onAuthenticationError(errorCode, errString)
+                // Error en la autenticación biométrica
+                Toast.makeText(applicationContext, "Error de autenticación: $errString", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                super.onAuthenticationSucceeded(result)
+                // Autenticación biométrica exitosa
+                handleLoginSuccess()
+            }
+
+            override fun onAuthenticationFailed() {
+                super.onAuthenticationFailed()
+                // Falla en la autenticación biométrica
+                Toast.makeText(applicationContext, "Autenticación fallida", Toast.LENGTH_SHORT).show()
+            }
+        })
+
+        // Configuración de la información del prompt
+        promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Autenticación Biométrica")
+            .setSubtitle("Usa tu huella digital para autenticarte")
+            .setNegativeButtonText("Cancelar")
+            .build()
+
+        // Botón para la autenticación biométrica
+        binding.btnBiometricLogin.setOnClickListener {
+            biometricPrompt.authenticate(promptInfo)
+        }
 
         binding.btnLogin.setOnClickListener {
             login()
@@ -209,5 +249,11 @@ class CrearCuentaActivity : AppCompatActivity() {
         }
     }
 
+    private fun handleLoginSuccess() {
+        val email = emailEdit.text.toString()
+        val password = passEdit.text.toString()
 
+        // Autenticamos al usuario en Firebase después de la autenticación biométrica
+        signInUser(email, password)
+    }
 }
