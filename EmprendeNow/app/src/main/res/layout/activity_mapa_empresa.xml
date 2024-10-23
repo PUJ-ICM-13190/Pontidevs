@@ -16,12 +16,27 @@
         app:layout_constraintTop_toTopOf="parent"
         android:src="@drawable/emprendenow"/>
 
+    <EditText
+        android:id="@+id/textDirection"
+        android:layout_width="350dp"
+        android:layout_height="48dp"
+        android:background="@drawable/search_bar"
+        android:drawableLeft="@android:drawable/ic_menu_directions"
+        android:hint="ingrese_direccion"
+        android:padding="10dp"
+        android:textSize="18sp"
+        android:inputType="text"
+        android:imeOptions="actionSend"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/logo" />
+
     <fragment
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@+id/logo"
+        app:layout_constraintTop_toBottomOf="@+id/textDirection"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/text" />
@@ -30,16 +45,17 @@
         android:id="@+id/text"
         android:layout_width="270dp"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
+        app:layout_constraintBottom_toTopOf="@+id/confirm_location"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="7dp"
-        android:layout_marginBottom="50dp"
+        android:layout_marginBottom="5dp"
         android:layout_marginTop="10dp"
         android:text="@string/usa_gps"
         android:textStyle="bold"
         android:textSize="20sp"/>
 
     <ImageView
+        android:id="@+id/location"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintStart_toEndOf="@+id/text"
@@ -47,6 +63,17 @@
         app:layout_constraintBottom_toBottomOf="@id/text"
         app:layout_constraintEnd_toEndOf="parent"
         android:src="@drawable/location_icon"/>
+
+    <Button
+        android:id="@+id/confirm_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="Confirmar ubicacion"
+        android:textSize="15sp"
+        android:backgroundTint="#cb6ce6"/>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
