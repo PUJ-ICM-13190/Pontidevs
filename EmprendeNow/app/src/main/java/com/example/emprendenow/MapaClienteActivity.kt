@@ -4,36 +4,19 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
-<<<<<<< HEAD
-import android.util.Log
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
-=======
 import android.widget.Toast
 
->>>>>>> 595cec57ab0a71b694005f5333f2bdbceb9cca32
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.example.emprendenow.databinding.ActivityMapaClienteBinding
-<<<<<<< HEAD
-import okhttp3.*
-import org.json.JSONObject
-import java.io.IOException
-import java.io.InputStream
-=======
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import java.util.logging.Logger
->>>>>>> 595cec57ab0a71b694005f5333f2bdbceb9cca32
 
 class MapaClienteActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
@@ -62,14 +45,9 @@ class MapaClienteActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityMapaClienteBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-<<<<<<< HEAD
-        // Inicializa el FusedLocationProviderClient para obtener la ubicación del usuario
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-=======
         val empresa = intent.getStringExtra("emprendimiento")
         val navbar = binding.bottomNavigation
         val databaseRef = FirebaseDatabase.getInstance().getReference("users")
->>>>>>> 595cec57ab0a71b694005f5333f2bdbceb9cca32
 
         // Verificar permisos de ubicación antes de inicializar el mapa
         checkLocationPermission()
@@ -88,11 +66,6 @@ class MapaClienteActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
     }
 
-<<<<<<< HEAD
-    override fun onMapReady(googleMap: GoogleMap) {
-        mMap = googleMap
-        enableLocation()
-=======
         databaseRef.orderByChild("emprendimiento/name").equalTo(empresa)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -122,7 +95,6 @@ class MapaClienteActivity : AppCompatActivity(), OnMapReadyCallback {
                     startActivity(intent)
                     true
                 }
->>>>>>> 595cec57ab0a71b694005f5333f2bdbceb9cca32
 
         // Leer las coordenadas de destino desde el archivo JSON
         val destinationLocation = readDestinationFromJson()
@@ -154,18 +126,6 @@ class MapaClienteActivity : AppCompatActivity(), OnMapReadyCallback {
                     currentLocation = LatLng(location.latitude, location.longitude)
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation!!, 15f))
 
-<<<<<<< HEAD
-                    mMap.addMarker(MarkerOptions().position(currentLocation!!).title("Tu ubicación"))
-                } else {
-                    Toast.makeText(this, "No se pudo obtener la ubicación actual", Toast.LENGTH_SHORT).show()
-                }
-            }.addOnFailureListener {
-                Toast.makeText(this, "Error al obtener la ubicación", Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: SecurityException) {
-            e.printStackTrace()
-        }
-=======
         val bogota = LatLng(4.60971, -74.08175)
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(bogota, 12f))
 
@@ -174,7 +134,6 @@ class MapaClienteActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.uiSettings.isMapToolbarEnabled = true
         mMap.uiSettings.isCompassEnabled = true
         mMap.uiSettings.isMyLocationButtonEnabled = true
->>>>>>> 595cec57ab0a71b694005f5333f2bdbceb9cca32
     }
 
     // Función para leer las coordenadas del destino desde un archivo JSON en res/raw

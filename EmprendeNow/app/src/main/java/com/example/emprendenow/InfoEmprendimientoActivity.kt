@@ -24,24 +24,9 @@ class InfoEmprendimientoActivity : AppCompatActivity(), SensorEventListener {
         binding = ActivityInfoEmprendimientoBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-<<<<<<< HEAD
-        // Inicializar el SensorManager y el acelerómetro
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-
-        // Registrar el listener del sensor
-        accelerometer?.also { sensor ->
-            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
-        }
-
-        val empresa = intent.getStringExtra("EmprendimientoName")
-        val navbar = binding.bottomNavigation
-        val location = binding.locationButton
-=======
         val empresa = intent.getStringExtra("EmprendimientoName")
         val navbar = binding.bottomNavigation
         val location =  binding.locationButton
->>>>>>> 595cec57ab0a71b694005f5333f2bdbceb9cca32
         binding.name.text = empresa
 
         navbar.setOnNavigationItemSelectedListener { item ->
