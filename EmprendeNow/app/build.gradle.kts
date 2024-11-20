@@ -54,10 +54,12 @@ dependencies {
     implementation(libs.play.services.location)
     implementation ("androidx.biometric:biometric:1.2.0-alpha04")
     implementation ("androidx.security:security-crypto:1.0.0")
+    implementation(libs.firebase.messaging.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation ("com.google.firebase:firebase-messaging:24.1.0")
 
     // Firebase BOM (manages versions of Firebase libraries)
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))

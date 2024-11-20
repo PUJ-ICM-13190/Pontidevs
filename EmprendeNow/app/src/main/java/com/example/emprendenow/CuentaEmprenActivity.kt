@@ -92,6 +92,8 @@ class CuentaEmprenActivity : AppCompatActivity() {
                     true
                 }
                 R.id.chat -> {
+                    val intent = Intent(this,ListaChatsEmprendedor::class.java)
+                    startActivity(intent)
                     true
                 }
                 R.id.account -> {

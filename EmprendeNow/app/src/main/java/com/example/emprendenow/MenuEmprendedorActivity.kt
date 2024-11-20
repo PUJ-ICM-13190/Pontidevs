@@ -30,6 +30,8 @@ class MenuEmprendedorActivity : AppCompatActivity() {
                 }
 
                 R.id.chat -> {
+                    val intent = Intent(this,ListaChatsEmprendedor::class.java)
+                    startActivity(intent)
                     true
                 }
 

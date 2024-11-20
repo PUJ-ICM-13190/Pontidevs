@@ -89,6 +89,8 @@ class CuentaClienActivity : AppCompatActivity() {
                     true
                 }
                 R.id.chat -> {
+                    val intent = Intent(this,ListaChatsActivity::class.java)
+                    startActivity(intent)
                     true
                 }
                 R.id.account -> {
