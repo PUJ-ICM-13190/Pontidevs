@@ -33,6 +33,8 @@ class ListaEmpresasActivity : AppCompatActivity(), SensorEventListener {
         binding = ActivityListaEmpresasBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val userId = intent.getStringExtra("user")
+
         // Inicializamos el sensor
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -58,6 +60,7 @@ class ListaEmpresasActivity : AppCompatActivity(), SensorEventListener {
                 }
                 R.id.account -> {
                     val intent = Intent(this, CuentaClienActivity::class.java)
+                    intent.putExtra("user", userId)
                     startActivity(intent)
                     true
                 }
@@ -77,11 +80,14 @@ class ListaEmpresasActivity : AppCompatActivity(), SensorEventListener {
                     if (userType == "Empresa") {
                         val name = empresaSnapshot.child("emprendimiento/name").getValue(String::class.java) ?: "Sin nombre"
                         val descripcion = empresaSnapshot.child("emprendimiento/description").getValue(String::class.java) ?: "Sin descripción"
+                        if (name == "Sin nombre" && descripcion == "Sin descripción") {
+                            continue
+                        }
                         val logo = "logo"
 
                         val empresa = Empresa(
                             name = name,
-                            logo = logo,
+                            userId = logo,
                             descripcion = descripcion
                         )
 
@@ -168,7 +174,7 @@ class ListaEmpresasActivity : AppCompatActivity(), SensorEventListener {
 
     data class Empresa (
         val name: String,
-        val logo: String,
+        val userId: String,
         val descripcion: String
     )
 }

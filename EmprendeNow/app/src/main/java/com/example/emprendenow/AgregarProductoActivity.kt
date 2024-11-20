@@ -8,15 +8,18 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
-import androidx.activity.enableEdgeToEdge
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.emprendenow.databinding.ActivityAgregarProductoBinding
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -26,6 +29,8 @@ import java.util.logging.Logger
 
 class AgregarProductoActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAgregarProductoBinding
+    private lateinit var mAuth: FirebaseAuth
+    private lateinit var mStorage: FirebaseStorage
     var pictureImagePath: Uri? = null
 
     companion object {
@@ -42,6 +47,7 @@ class AgregarProductoActivity : AppCompatActivity() {
         ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             val newUri = Uri.parse(pictureImagePath.toString() + "?time=" + System.currentTimeMillis())
+            pictureImagePath = newUri
             logger.info("Image capture successfully")
         } else {
             logger.warning("Capture failed")
@@ -51,8 +57,13 @@ class AgregarProductoActivity : AppCompatActivity() {
     private val galleryActivityResultLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
-            val imageUri: Uri? = result.data!!.data
-            logger.info("Image loaded successfully")
+            val imageUri: Uri? = result.data?.data
+            if (imageUri != null) {
+                logger.info("Image loaded successfully")
+                pictureImagePath = imageUri
+            } else {
+                logger.warning("No image selected")
+            }
         }
     }
 
@@ -61,12 +72,14 @@ class AgregarProductoActivity : AppCompatActivity() {
         binding = ActivityAgregarProductoBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val productos: MutableList<Producto> = mutableListOf()
 
+        val userId = intent.getStringExtra("user")
         val addBtn = binding.add
         val back = binding.back
         val camera = binding.buttonTake
         val galery = binding.buttonGalery
+
+        mAuth = Firebase.auth
 
         camera.setOnClickListener {
             verifyPermissions(this, android.Manifest.permission.CAMERA, "El permiso es requerido para capturar la foto")
@@ -83,7 +96,10 @@ class AgregarProductoActivity : AppCompatActivity() {
             val productPrice = binding.price.text.toString().toDoubleOrNull() ?: 0.0
             val productDescription = binding.description.text.toString()
             val nuevoProducto = Producto(name = productName, price = productPrice, description = productDescription)
-            productos.add(nuevoProducto)
+            if (userId != null) {
+                agregarProducto(userId, nuevoProducto)
+                pictureImagePath?.let { uploadImageToFirebase(it) }
+            }
         }
 
         back.setOnClickListener {
@@ -153,9 +169,70 @@ class AgregarProductoActivity : AppCompatActivity() {
         return File(storageDir, imageFileName)
     }
 
+    private fun agregarProducto(userId: String, producto: Producto) {
+        val databaseRef = FirebaseDatabase.getInstance().getReference("users/$userId/producto")
+
+        val datos = hashMapOf(
+            "name" to producto.name,
+            "description" to producto.description,
+            "price" to producto.price
+        )
+
+        databaseRef.setValue(datos)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Toast.makeText(this, "Producto añadido", Toast.LENGTH_SHORT).show()
+                    binding.name.text.clear()
+                    binding.description.text.clear()
+                    binding.price.text.clear()
+                } else {
+                    Toast.makeText(this, "No se pudo añadir el producto", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun uploadImageToFirebase(imageUri: Uri) {
+
+        var storageRef = mStorage.reference
+        val nombreProducto = binding.name.text.toString()
+        val pictureRef = storageRef.child("productos/$nombreProducto.jpg")
+
+        try {
+            val fileExists = try {
+                contentResolver.openInputStream(imageUri)?.close()
+                true
+            } catch (e: Exception) {
+                logger.warning("No se pudo abrir el archivo: ${e.message}")
+                false
+            }
+
+            if (!fileExists) {
+                logger.warning("El archivo seleccionado no existe.")
+                return
+            }
+            logger.info("URI de la imagen: $imageUri")
+
+            pictureRef.putFile(imageUri)
+                .addOnSuccessListener {
+                    pictureRef.downloadUrl.addOnSuccessListener { uri ->
+                        val downloadUrl = uri.toString()
+                        logger.info("Imagen subida con éxito: $downloadUrl")
+                    }
+                }
+                .addOnFailureListener { e ->
+                    logger.severe("Fallo al subir la imagen al storage: ${e.message}")
+                }
+        } catch (e: Exception) {
+            logger.severe("Error al intentar subir la imagen: ${e.message}")
+        }
+    }
+
     data class Producto(
         val name: String,
-        val price: Double,
+        val price: Number,
         val description: String
     )
 }

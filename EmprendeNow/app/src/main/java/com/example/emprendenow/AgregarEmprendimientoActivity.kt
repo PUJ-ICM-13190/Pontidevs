@@ -12,10 +12,16 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.emprendenow.databinding.ActivityAgregarEmprendimientoBinding
 import com.example.emprendenow.databinding.ActivityLogIn2Binding
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
 import java.util.logging.Logger
 
 class AgregarEmprendimientoActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAgregarEmprendimientoBinding
+    private lateinit var mStorage: FirebaseStorage
+
+    private lateinit var globalUri: Uri
+
+    private var nombreEmpresa: String = ""
 
     companion object {
         val TAG: String = AgregarEmprendimientoActivity::class.java.name
@@ -25,8 +31,13 @@ class AgregarEmprendimientoActivity : AppCompatActivity() {
     private val galleryActivityResultLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
-            val imageUri: Uri? = result.data!!.data
-            logger.info("Image loaded successfully")
+            val imageUri: Uri? = result.data?.data
+            if (imageUri != null) {
+                logger.info("Image loaded successfully")
+                globalUri = imageUri
+            } else {
+                logger.warning("No image selected")
+            }
         }
     }
 
@@ -60,6 +71,9 @@ class AgregarEmprendimientoActivity : AppCompatActivity() {
 
             if (userId != null && emprenName.isNotBlank() && emprenDescription.isNotBlank()) {
                 addEmprendimientoToUser(userId, emprenName, emprenDescription)
+                if (globalUri != null) {
+                    uploadImageToFirebase(globalUri)
+                }
             } else {
                 Toast.makeText(this, "Llenar todos los campos", Toast.LENGTH_SHORT).show()
             }
@@ -91,4 +105,41 @@ class AgregarEmprendimientoActivity : AppCompatActivity() {
                 Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
             }
     }
+
+    private fun uploadImageToFirebase(imageUri: Uri) {
+
+        var storageRef = mStorage.reference
+        nombreEmpresa = binding.name.text.toString()
+        val pictureRef = storageRef.child("empresas/$nombreEmpresa.jpg")
+
+        try {
+            val fileExists = try {
+                contentResolver.openInputStream(imageUri)?.close()
+                true
+            } catch (e: Exception) {
+                logger.warning("No se pudo abrir el archivo: ${e.message}")
+                false
+            }
+
+            if (!fileExists) {
+                logger.warning("El archivo seleccionado no existe.")
+                return
+            }
+            logger.info("URI de la imagen: $imageUri")
+
+            pictureRef.putFile(imageUri)
+                .addOnSuccessListener {
+                    pictureRef.downloadUrl.addOnSuccessListener { uri ->
+                        val downloadUrl = uri.toString()
+                        logger.info("Imagen subida con éxito: $downloadUrl")
+                    }
+                }
+                .addOnFailureListener { e ->
+                    logger.severe("Fallo al subir la imagen al storage: ${e.message}")
+                }
+        } catch (e: Exception) {
+            logger.severe("Error al intentar subir la imagen: ${e.message}")
+        }
+    }
+
 }

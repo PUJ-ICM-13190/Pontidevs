@@ -1,6 +1,5 @@
 package com.example.emprendenow
 
-import android.content.Context
 import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -10,10 +9,17 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.emprendenow.databinding.ActivityInfoEmprendimientoBinding
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class InfoEmprendimientoActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var binding: ActivityInfoEmprendimientoBinding
+    private lateinit var databaseRef: DatabaseReference
+    private val listaProductos = mutableListOf<AgregarProductoActivity.Producto>()
     private lateinit var sensorManager: SensorManager
     private var accelerometer: Sensor? = null
     private var lastShakeTime: Long = 0
@@ -28,6 +34,15 @@ class InfoEmprendimientoActivity : AppCompatActivity(), SensorEventListener {
         val navbar = binding.bottomNavigation
         val location =  binding.locationButton
         binding.name.text = empresa
+
+        databaseRef = FirebaseDatabase.getInstance().getReference("users")
+
+        if (empresa != null) {
+            listarProductos(empresa)
+        }
+
+        val adapter = AdaptadorProducto(this, listaProductos)
+        binding.listView.adapter = adapter
 
         navbar.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
@@ -96,5 +111,41 @@ class InfoEmprendimientoActivity : AppCompatActivity(), SensorEventListener {
         super.onPause()
         // Detener el listener del sensor para ahorrar batería cuando la actividad está en segundo plano
         sensorManager.unregisterListener(this)
+    }
+
+    private fun listarProductos(empresa: String) {
+        databaseRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                listaProductos.clear()
+
+                for (empresaSnapshot in snapshot.children) {
+                    val userType = empresaSnapshot.child("userType").getValue(String::class.java)
+                    if (userType == "Empresa") {
+                        val nameEmpresa = empresaSnapshot.child("emprendimiento/name").getValue(String::class.java) ?: "Sin nombre"
+                        if (nameEmpresa != empresa) {
+                            continue
+                        }
+                        val name = empresaSnapshot.child("producto/name").getValue(String::class.java) ?: "Sin nombre"
+                        val descripcion = empresaSnapshot.child("producto/description").getValue(String::class.java) ?: "Sin descripción"
+                        val precio = empresaSnapshot.child("producto/price").getValue(Double::class.java) ?: 0
+                        val logo = "logo"
+
+                        val producto = AgregarProductoActivity.Producto(
+                            name = name,
+                            description = descripcion,
+                            price = precio
+                        )
+
+                        listaProductos.add(producto)
+                    }
+                }
+
+                (binding.listView.adapter as AdaptadorProducto).notifyDataSetChanged()
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(this@InfoEmprendimientoActivity, "Error al leer los datos", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }

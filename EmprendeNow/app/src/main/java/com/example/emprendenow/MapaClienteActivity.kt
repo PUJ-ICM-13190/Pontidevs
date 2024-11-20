@@ -17,6 +17,10 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.example.emprendenow.databinding.ActivityMapaClienteBinding
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
@@ -28,6 +32,7 @@ class MapaClienteActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityMapaClienteBinding
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var currentLocation: LatLng? = null // Verificamos si ya tenemos la ubicación
+    private var empresaGlobal: String = ""
 
     private val client = OkHttpClient()  // Cliente para hacer peticiones HTTP
 
@@ -42,6 +47,11 @@ class MapaClienteActivity : AppCompatActivity(), OnMapReadyCallback {
 
         binding = ActivityMapaClienteBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val empresa = intent.getStringExtra("emprendimiento")
+        if (empresa != null) {
+            empresaGlobal = empresa
+        }
 
         // Inicializa el FusedLocationProviderClient para obtener la ubicación del usuario
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -68,14 +78,14 @@ class MapaClienteActivity : AppCompatActivity(), OnMapReadyCallback {
         enableLocation()
 
         // Leer las coordenadas de destino desde el archivo JSON
-        val destinationLocation = readDestinationFromJson()
-
-        if (destinationLocation != null) {
-            createRouteToDestination(destinationLocation)
-            // Aquí agregamos el marcador en el destino
-            mMap.addMarker(MarkerOptions().position(destinationLocation).title("Destino"))  // Aseguramos agregar el marcador
-        } else {
-            Toast.makeText(this, "Error al cargar el destino", Toast.LENGTH_SHORT).show()
+        readFromDatabase { destinationLocation ->
+            if (destinationLocation != null) {
+                createRouteToDestination(destinationLocation)
+                // Aquí agregamos el marcador en el destino
+                mMap.addMarker(MarkerOptions().position(destinationLocation).title("Destino"))  // Aseguramos agregar el marcador
+            } else {
+                Toast.makeText(this, "Error al cargar el destino", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -268,5 +278,29 @@ class MapaClienteActivity : AppCompatActivity(), OnMapReadyCallback {
                 Toast.makeText(this, "Permiso de ubicación denegado", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun readFromDatabase(callback: (LatLng?) -> Unit) {
+        val databaseRef = FirebaseDatabase.getInstance().getReference("users")
+        databaseRef.orderByChild("emprendimiento/name").equalTo(empresaGlobal)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    for (empresaSnapshot in dataSnapshot.children) {
+                        val latitud = empresaSnapshot.child("location/latitude").getValue(Double::class.java)
+                        val longitud = empresaSnapshot.child("location/longitude").getValue(Double::class.java)
+                        if (latitud != null && longitud != null) {
+                            val empresaLocation = LatLng(latitud, longitud)
+                            callback(empresaLocation) // Devuelve la ubicación al callback
+                            return
+                        }
+                    }
+                    callback(null) // Si no se encuentra, devuelve null
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    Toast.makeText(this@MapaClienteActivity, "Error al cargar la ubicación", Toast.LENGTH_SHORT).show()
+                    callback(null) // Maneja el caso de error
+                }
+            })
     }
 }
